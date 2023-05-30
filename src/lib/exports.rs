@@ -31,6 +31,7 @@ pub enum ExportFormatEnum {
     Epub,
     PDF,
     Zip,
+    Vol
 }
 
 pub struct PDF;
@@ -449,6 +450,74 @@ impl ExportFormat for Zip {
     }
 }
 
+pub struct Vol;
+
+impl Vol {
+
+    fn write_single_vol(&self, episode: &EpisodeCache, zip: &mut ZipWriter<BufWriter<File>>) {
+        for (i, path) in episode.get_paths().iter().enumerate() {
+            let file_ext = path.extension().unwrap().to_str().unwrap();
+            let mut file = File::open(path).unwrap();
+            let mut buf = Vec::new();
+            file.read_to_end(&mut buf).unwrap();
+            zip.start_file(
+                format!("pic_{}.{}", i, file_ext),
+                Zip::make_options(),
+            )
+                .unwrap();
+            zip.write_all(&buf).unwrap();
+        }
+    }
+
+    fn write_multiple_vol(&self, episodes: Vec<&EpisodeCache>, zip: &mut ZipWriter<BufWriter<File>>, bar: &ProgressBar) {
+        let mut index = 1;
+        for episode in episodes {
+            for path in episode.get_paths().iter() {
+                let file_ext = path.extension().unwrap().to_str().unwrap();
+                let mut file = File::open(path).unwrap();
+                let mut buf = Vec::new();
+                file.read_to_end(&mut buf).unwrap();
+                zip.start_file(
+                    format!("pic_{}.{}", index, file_ext),
+                    Zip::make_options(),
+                ).unwrap();
+                zip.write_all(&buf).unwrap();
+                index = index + 1;
+            }
+            bar.inc(1);
+        }
+    }
+}
+
+impl ExportFormat for Vol {
+    fn get_extension(&self) -> &'static str {
+        "zip"
+    }
+
+    fn export_single<P: AsRef<Path>>(&self, episode: &EpisodeCache, path: P, _config: &Config) {
+        let file = File::create(path).unwrap();
+        let writer = BufWriter::new(file);
+        let mut zip = ZipWriter::new(writer);
+        self.write_single_vol(episode, &mut zip);
+        zip.finish().unwrap();
+    }
+
+    fn export_multiple<P: AsRef<Path>>(
+        &self,
+        episodes: Vec<&EpisodeCache>,
+        _title: &str,
+        path: P,
+        _config: &Config,
+        bar: &ProgressBar,
+    ) {
+        let file = File::create(path).unwrap();
+        let writer = BufWriter::new(file);
+        let mut zip = ZipWriter::new(writer);
+        self.write_multiple_vol(episodes, &mut zip, bar);
+        zip.finish().unwrap();
+    }
+}
+
 //
 // pub fn export_zip(
 //     split_episodes: bool,
@@ -568,7 +637,7 @@ pub fn export(
     for item in items {
         let file_name = format!("{}.{}", item.make_file_name(), format.get_extension());
         overall_bar.set_message(format!("导出 {}...", &file_name));
-        let path = out_dir.join(file_name);
+        let path = out_dir.join(&file_name);
 
         match item {
             Item::Single(episode) => {

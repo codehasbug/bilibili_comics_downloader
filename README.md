@@ -100,7 +100,9 @@
 
     ``
 
-- `bcdown export [链接或ID] --format [epub或pdf] <--range [开始]-[结束],[开始]-,-[结束]> <-s 单独导出每一话> <--output [输出位置]> <-g [组大小>] `  - 导出一个本地漫画
+- `bcdown export [链接或ID] --format [epub | pdf | zip | vol.zip] <--range [开始]-[结束],[开始]-,-[结束]> <-s 单独导出每一话> <--output [输出位置]> <-g [组大小>] `  - 导出一个本地漫画
+
+vol.zip导出按顺序将图片命名为`pic_[order]`的纯图片zip文件，不含任何文件夹，方便整卷阅读。
 
 ## 构建，编译，安装
 

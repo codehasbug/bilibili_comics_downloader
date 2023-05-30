@@ -602,6 +602,8 @@ pub fn export(
                 },
             }
             .into()
+        } else if format == "vol.zip" {
+            exports::Vol {}.into()
         } else {
             exports::Zip {}.into()
         };

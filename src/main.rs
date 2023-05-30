@@ -178,6 +178,8 @@ async fn main() {
                     log.info("有效的输出格式可以是：");
                     println!("    1. pdf");
                     println!("    2. epub");
+                    println!("    3. zip");
+                    println!("    4. vol.zip");
                     return;
                 }
                 // let from = matches.value_of("from").unwrap_or("-1").parse::<f64>().unwrap();
@@ -195,8 +197,8 @@ async fn main() {
                     return;
                 }
                 let format = matches.value_of("format").unwrap();
-                if format != "epub" && format != "pdf" && format != "zip" {
-                    log.error("目前只支持导出 epub | pdf | zip 格式");
+                if format != "epub" && format != "pdf" && format != "zip" && format != "vol.zip" {
+                    log.error("目前只支持导出 epub | pdf | zip | vol.zip 格式");
                     return;
                 }
                 lib::export(
