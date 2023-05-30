@@ -69,7 +69,7 @@ async fn main() {
                         .value_name("FORMAT")
                         .short('f')
                         .long("format")
-                        .help("导出的格式，epub | pdf | zip"),
+                        .help("导出的格式，epub | pdf | zip | vol.zip"),
                 )
                 // .arg(
                 //     Arg::new("from")
