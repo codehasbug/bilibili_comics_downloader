@@ -165,6 +165,7 @@ pub async fn check_qr_status(config: &Config, oauth: String) -> QRStatus {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct EpisodeInfo {
+    pub short_title: String,
     pub title: String,
     pub id: u32,
     pub is_locked: bool,
@@ -226,6 +227,7 @@ pub async fn get_comic_info(config: &Config, comic_id: u32) -> ComicInfo {
                 // 如果有标题为空的episode，则使用ord作为标题
                 for ep in value.ep_list.iter_mut() {
                     // 去除空字符
+                    ep.short_title = ep.short_title.trim().to_string();
                     ep.title = ep.title.trim().to_string();
                     if ep.title.is_empty() {
                         ep.title = format!("第{}话", ep.ord);

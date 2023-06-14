@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct EpisodeMeta {
+    short_title: String,
     title: String,
     ord: f64,
     // 顺序号
@@ -17,6 +18,7 @@ struct EpisodeMeta {
 pub struct EpisodeCache {
     pub id: u32,
     // episode id 作为文件夹名称
+    pub short_title: String,
     pub title: String,
     pub files: Vec<String>,
     // 真实文件列表 xx.jpg, xx.jpg, xx.jpg, ...
@@ -62,6 +64,7 @@ impl EpisodeCache {
             .collect::<Vec<_>>();
         Some(EpisodeCache {
             id: path.as_ref().file_name()?.to_str()?.parse::<u32>().ok()?,
+            short_title: meta.short_title,
             title: meta.title,
             files,
             paths: meta.paths,
@@ -78,6 +81,7 @@ impl EpisodeCache {
         let meta_path = path.as_ref().join("meta.toml");
         let mut meta_file = std::fs::File::create(&meta_path).unwrap();
         let meta = EpisodeMeta {
+            short_title: self.short_title.clone(),
             title: self.title.clone(),
             ord: self.ord,
             paths: self.paths.clone(),

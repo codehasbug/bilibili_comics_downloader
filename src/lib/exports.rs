@@ -409,7 +409,7 @@ impl Zip {
             let mut buf = Vec::new();
             file.read_to_end(&mut buf).unwrap();
             zip.start_file(
-                format!("{} - {}/{}.{}", episode.ord, episode.title, i, file_ext),
+                format!("{:04} {} {}/{}.{}", episode.ord, episode.short_title, episode.title, i, file_ext),
                 Zip::make_options(),
             )
             .unwrap();
@@ -597,17 +597,19 @@ fn get_min_max_ord(episodes: &Vec<&EpisodeCache>) -> (f64, f64) {
 impl Item<'_> {
     fn make_file_name(&self) -> String {
         match self {
-            Item::Single(ep) => format!("{}. {}", ep.ord, ep.title),
+            Item::Single(ep) => format!("{}. {} {}", ep.ord, ep.short_title, ep.title),
             Item::Group(eps) => {
                 let (min, max) = get_min_max_ord(eps);
                 if min == max {
-                    return format!("{}. {}", min, eps[0].title);
+                    return format!("{}. {} {}", min, eps[0].short_title, eps[0].title);
                 }
                 format!(
-                    "{}-{}. {}-{}",
+                    "{}-{}. {} {}-{} {}",
                     min,
                     max,
+                    eps[0].short_title,
                     eps[0].title,
+                    eps.last().unwrap().short_title,
                     eps.last().unwrap().title
                 )
             }

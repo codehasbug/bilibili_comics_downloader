@@ -30,7 +30,14 @@ async fn main() {
         )
         .subcommand(Command::new("info").about("获取工具信息，包括配置信息和缓存信息"))
         .subcommand(Command::new("clear").about("清除缓存"))
-        .subcommand(Command::new("list").about("获取本地缓存的漫画列表"))
+        .subcommand(Command::new("list").about("获取本地缓存的漫画列表")
+            .arg(
+            Arg::new("id_or_link")
+                .value_name("ID_OR_LINK")
+                .help("可选：漫画的ID或者链接，未指定则输出所有列表")
+                .required(false),
+            ),
+        )
         .subcommand(
             Command::new("search")
                 .about("在bilibili漫画中查找某个漫画")
@@ -55,6 +62,15 @@ async fn main() {
                         .short('r')
                         .help("指定下载范围，如1-3,5,7-"),
                 ),
+        )
+        .subcommand(
+            Command::new("check")
+                .about("检验某部漫画缓存的完整性")
+                .arg(
+                    Arg::new("id_or_link")
+                        .value_name("ID_OR_LINK")
+                        .help("漫画的ID或者链接"),
+                )
         )
         .subcommand(
             Command::new("export")
@@ -142,8 +158,24 @@ async fn main() {
         Some(("clear", _)) => {
             lib::clear();
         }
-        Some(("list", _)) => {
-            lib::list().await;
+        Some(("check", matches)) => {
+            if let Some(id_or_link) = matches.value_of("id_or_link") {
+                lib::check(id_or_link.to_owned()).await;
+            } else {
+                log.error("缺少漫画的ID或者链接");
+                log.info("使用bcdown search <ID_OR_LINK> 来搜索漫画");
+                log.info("有效的ID或者链接可以是：");
+                println!("    1. https://manga.bilibili.com/detail/mc29911");
+                println!("    2. mc29911");
+                println!("    3. 29911");
+            }
+        }
+        Some(("list", matches)) => {
+            if let Some(id_or_link) = matches.value_of("id_or_link") {
+                lib::list_by_id(id_or_link.to_owned()).await;
+            } else {
+                lib::list().await;
+            }
         }
         Some(("search", matches)) => {
             if let Some(id_or_link) = matches.value_of("id_or_link") {

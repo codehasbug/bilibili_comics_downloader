@@ -1,11 +1,11 @@
 [package]
 name = "bcdown"
-version = "0.2.2"
+version = "0.3.0"
 edition = "2021"
-authors = ["lihe07"]
-keywords = ["bcdown", "bilibili", "downloader", "comic"]
-description = "Bilibili漫画下载器，written in Rust，支持epub pdf zip格式"
-repository = "https://github.com/lihe07/bilibili_comics_downloader"
+authors = ["yyjgal","lihe07"]
+keywords = ["bcdown", "bilibili", "downloader", "comic", "魔改版"]
+description = "Bilibili漫画下载器，written in Rust，支持epub pdf zip vol.zip格式"
+repository = "https://github.com/codehasbug/bilibili_comics_downloader"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -22,6 +22,7 @@ enum_dispatch = "0.3.8"
 epub-builder = "0.5.0"
 futures = "0.3.24"
 indicatif = "0.17.1"
+sha-1 = "0.10.1"
 md5 = "0.7.0"
 paris = "1.5.13"
 printpdf = { version = "0.5.3", features = ["embedded_images"] }
