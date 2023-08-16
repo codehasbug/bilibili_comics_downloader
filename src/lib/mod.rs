@@ -12,9 +12,10 @@ use std::path::{Path, PathBuf};
 use std::process::exit;
 use std::time::Duration;
 use tokio::sync::mpsc::Sender;
-
+use network::fix_episode_title;
 use sha1::{Sha1, Digest, digest};
 use std::fmt::LowerHex;
+use std::fs;
 
 use crate::lib::cache::EpisodeCache;
 use crate::lib::config::Config;
@@ -203,7 +204,7 @@ pub async fn list_by_id(id_or_link: String) {
             let episodes = episodes
                 .iter()
                 .map(|e| {
-                    if e.not_downloaded().is_empty() {
+                    if e.not_downloaded_uncheck().is_empty() {
                         format!("    {} - {} {} ({}) - {}", e.ord, e.short_title, e.title, e.id, "已下载".green())
                     } else {
                         format!("    {} - {} {} ({}) - {}", e.ord, e.short_title, e.title, e.id, "未下载".red())
@@ -227,7 +228,7 @@ pub async fn list() {
         let episodes = episodes
             .iter()
             .map(|e| {
-                if e.not_downloaded().is_empty() {
+                if e.not_downloaded_uncheck().is_empty() {
                     format!("    {} - {} {} ({}) - {}", e.ord, e.short_title, e.title, e.id, "已下载".green())
                 } else {
                     format!("    {} - {} {} ({}) - {}", e.ord, e.short_title, e.title, e.id, "未下载".red())
@@ -330,6 +331,7 @@ pub async fn check(id_or_link: String) {
                     let current_sha1_value = format!("{:x}", result.as_ref()).to_string();
                     if original_sha1_value != current_sha1_value {
                         err_info.push(format!("{} {} {} {} 页{} {} - {} {}", "错误：".red(), ep.ord, ep.short_title, ep.title, i, original_sha1_value, current_sha1_value, original_sha1_value == current_sha1_value).to_string());
+                        fs::remove_file(path).expect("Delete failure!");
                         err = true;
                     }
                 }
@@ -706,7 +708,7 @@ pub fn export(
         };
 
         let out_dir = export_dir.unwrap_or(config.default_download_dir.as_str());
-        let out_dir = Path::new(out_dir).join(&comic_cache.title);
+        let out_dir = Path::new(out_dir).join(fix_episode_title(&comic_cache.title));
         if !out_dir.exists() || !out_dir.is_dir() {
             std::fs::create_dir_all(&out_dir).unwrap();
         }

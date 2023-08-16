@@ -189,7 +189,7 @@ pub struct ComicInfo {
     pub vertical_cover: String,
 }
 
-fn fix_episode_title(title: &str) -> String {
+pub fn fix_episode_title(title: &str) -> String {
     // 将所有不能作为文件名的字符替换为下划线，包括正斜杠和反斜杠
     let mut result = title.to_string();
     for c in title.chars() {

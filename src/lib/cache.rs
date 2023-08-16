@@ -1,7 +1,10 @@
 use super::config::Config;
 use std::collections::HashMap;
+use std::fs;
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
+use sha1::Sha1;
+use crate::lib::create_hash;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct EpisodeMeta {
@@ -91,7 +94,7 @@ impl EpisodeCache {
         meta_file.write_all(meta_str.as_bytes()).unwrap();
     }
 
-    pub fn not_downloaded(&self) -> Vec<String> {
+    pub fn not_downloaded_uncheck(&self)  -> Vec<String> {
         // 返回未下载的文件名
         let mut not_downloaded = Vec::new();
         for path in &self.paths {
@@ -99,6 +102,29 @@ impl EpisodeCache {
             if !self.files.contains(&end.to_string()) {
                 not_downloaded.push(path.to_owned());
             }
+        }
+        not_downloaded
+    }
+
+    pub fn not_downloaded(&self) -> Vec<String> {
+        // 返回未下载的文件名
+        let mut not_downloaded = Vec::new();
+        for path in &self.paths {
+            let end = path.split('/').last().unwrap();
+            if !self.files.contains(&end.to_string()) {
+                not_downloaded.push(path.to_owned());
+            } else {
+                let file_name = path.split('/').last().unwrap();
+                let path_buf = self.root_dir.join(file_name);
+                let original_sha1_value = path_buf.file_stem().unwrap().to_str().unwrap().to_string();
+                let result = create_hash(&path_buf, Sha1::default());
+                let current_sha1_value = format!("{:x}", result.as_ref()).to_string();
+                if original_sha1_value != current_sha1_value {
+                    fs::remove_file(path_buf).unwrap();
+                    not_downloaded.push(path.to_owned());
+                }
+            }
+
         }
         not_downloaded
     }
